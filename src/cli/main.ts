@@ -103,6 +103,7 @@ export async function cleanupCliCommand(): Promise<void> {
 
     // Remove SIGINT handler since command completed successfully
     process.removeListener("SIGINT", sigintHandler);
+    process.removeListener("SIGTERM", sigintHandler);
 
     // Shutdown analytics for non-server CLI commands to ensure clean exit
     await telemetry.shutdown();
@@ -123,7 +124,9 @@ export async function runCli(): Promise<void> {
 
   // Ensure only one SIGINT handler is active
   process.removeListener("SIGINT", sigintHandler);
+  process.removeListener("SIGTERM", sigintHandler);
   process.on("SIGINT", sigintHandler);
+  process.on("SIGTERM", sigintHandler);
 
   try {
     const cli = createCli(process.argv);
@@ -221,6 +224,7 @@ if (import.meta.hot) {
   import.meta.hot.on("vite:beforeFullReload", async () => {
     logger.info("🔥 Hot reload detected");
     process.removeListener("SIGINT", sigintHandler);
+    process.removeListener("SIGTERM", sigintHandler);
 
     const wasAlreadyShuttingDown = isShuttingDown;
     isShuttingDown = true;
