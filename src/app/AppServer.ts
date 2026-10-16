@@ -114,6 +114,9 @@ export class AppServer {
     const basePath = this.location.basePath;
     this.server = Fastify({
       logger: false, // Use our own logger
+      // tRPC's httpBatchLink puts every batched procedure name in the path.
+      // Fastify's default limit of 100 characters fails a batch of about 8.
+      routerOptions: { maxParamLength: 5000 },
       // One set of root-mounted routes serves proxies that forward the base
       // path and proxies that strip it.
       rewriteUrl: (request) => stripBasePath(request.url ?? "/", basePath),
